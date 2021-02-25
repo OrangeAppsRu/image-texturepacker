@@ -1,0 +1,31 @@
+name: Push latest version
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*.*.*'
+jobs:
+  docker-build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+      - name: Set env
+        run: |
+          if [[ $(echo ${GITHUB_REF#refs/heads/}) == "main" ]]
+          then
+            echo "RELEASE_VERSION=latest" >> $GITHUB_ENV    
+          else 
+            echo "RELEASE_VERSION=$(echo ${GITHUB_REF:10})" >> $GITHUB_ENV
+          fi
+      - name: Publish latest tag to registry
+        env:
+          IMAGE: ${{ github.repository }}
+          GITHUB_USER: ${{ github.repository_owner }}
+          GITHUB_TOKEN: ${{ secrets.GH_PERSONAL_TOKEN }}
+        run: |
+          image=`echo -n "${IMAGE}" | tr 'A-Z' 'a-z'`
+          docker version
+          docker build -t ghcr.io/${image}:${RELEASE_VERSION} .
+          docker login -u "${GITHUB_USER}" -p "${GITHUB_TOKEN}" ghcr.io
+          docker push ghcr.io/${image}:${RELEASE_VERSION}
