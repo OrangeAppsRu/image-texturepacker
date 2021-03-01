@@ -28,5 +28,5 @@ ENV MODE=exclusive
 ENV LABELS=default_label
 ENV NAME=default_agent
 ENV FSROOT=/root/
-ENV TexturePackerLicense=
+ENV TEXTUREPACKER_LICENSE=key
 ENTRYPOINT ["/entrypoint.sh"]
